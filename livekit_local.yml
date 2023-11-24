@@ -1,0 +1,43 @@
+services:
+  livekit:
+    build:
+      context: .
+      dockerfile: livekit_local.Dockerfile
+    command: livekit-server --dev --config ./livekit.yaml
+    restart: unless-stopped
+    network_mode: host
+    # ports: Not applicable in network_mode=host
+    #   - "7880:7880"
+    #   - "50000-50200/udp"
+    #   - "7881:7881"
+    #   - "7882:7882"
+    #   - "5349:5349"
+    #   - "3478:3478"
+    volumes:
+      - ./livekit.yaml:/livekit/livekit.yaml
+
+  publisher:
+    build:
+      context: ../python_client
+      dockerfile: publisher.Dockerfile
+    command: python publish_hue.py
+    restart: unless-stopped
+    depends_on:
+      - livekit
+    ports:
+      - "7880"
+      - "50201-50400/udp"
+    environment:
+      - LIVEKIT_URL=ws://192.168.0.50:7880
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=secret
+      - LIVEKIT_ROOM_NAME=my-room
+
+  web-client:
+    build:
+      context: ../web_client
+      dockerfile: web_client.Dockerfile
+    command: pnpm sample --host
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
