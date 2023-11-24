@@ -18,7 +18,7 @@ services:
 
   publisher:
     build:
-      context: ../python_client
+      context: ./python_client
       dockerfile: publisher.Dockerfile
     command: python publish_hue.py
     restart: unless-stopped
@@ -35,7 +35,7 @@ services:
 
   web-client:
     build:
-      context: ../web_client
+      context: ./web_client
       dockerfile: web_client.Dockerfile
     command: pnpm sample --host
     restart: unless-stopped
